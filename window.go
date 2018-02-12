@@ -31,6 +31,7 @@ func NewWindow(title string, width, height int) *Window {
 	w.window.Connect("key-press-event", w.KeysEvent)
 
 	w.notebook = gtk.NewNotebook()
+	w.notebook.SetShowTabs(false)
 	w.window.Add(w.notebook)
 
 	w.keyEvents = make(chan *gdk.EventKey)
@@ -60,14 +61,16 @@ func (w *Window) NewTab() {
 	n := w.notebook.AppendPage(child, label)
 
 	w.notebook.ChildSet(child, "tab-expand", true)
-	w.notebook.SetReorderable(child, true)
+	// w.notebook.SetReorderable(child, true)
 	w.notebook.ShowAll()
+	w.notebook.SetShowTabs(len(w.tabs) > 1)
 
 	w.notebook.SetCurrentPage(n)
 	// w.notebook.SetFocusChild(child)
 
 	// w.notebook.ShowAll()
 	child.GrabFocus()
+
 }
 
 func (w *Window) getCurrentTab() (t NotebookTab, n int) {
@@ -84,7 +87,7 @@ func (w *Window) CloseTab() {
 
 	w.tabs = append(w.tabs[:n], w.tabs[n+1:]...)
 
-	// t.Close()
+	w.notebook.SetShowTabs(len(w.tabs) > 1)
 
 	if len(w.tabs) == 0 {
 		w.Quit()
@@ -99,6 +102,27 @@ func (w *Window) Copy() {
 func (w *Window) Paste() {
 	t, _ := w.getCurrentTab()
 	t.Paste()
+}
+
+func (w *Window) NextTab() {
+	n := w.notebook.GetCurrentPage()
+	w.ShowTab(n + 1)
+}
+
+func (w *Window) PrevTab() {
+	n := w.notebook.GetCurrentPage()
+	w.ShowTab(n - 1)
+}
+
+func (w *Window) ShowTab(n int) {
+	if n >= len(w.tabs) {
+		n = 0
+	}
+	if n < 0 {
+		n = len(w.tabs) - 1
+	}
+
+	w.notebook.SetCurrentPage(n)
 }
 
 func (w *Window) Quit() {
@@ -145,10 +169,12 @@ func (w *Window) KeysEvent(ctx *glib.CallbackContext) {
 func (w *Window) KeysHandler() {
 	for {
 		key := <-w.keyEvents
+		// log.Printf("%s    %x %d", string(key.Keyval), key.Keyval, key.HardwareKeycode)
+
 		k := NewKey(key)
 
 		f, ok := w.binds[k]
-		if !ok {
+		if !ok || !f.IsValid() || f.IsNil() {
 			continue
 		}
 
