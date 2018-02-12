@@ -15,10 +15,7 @@ import (
 func init() {
 	log.SetFlags(log.Lshortfile)
 
-	defaultConf()
 	readConf()
-
-	log.Printf("%#v", &Conf)
 }
 
 func main() {
@@ -49,6 +46,38 @@ var Conf struct {
 	Binds map[string]string
 }
 
+func readConf() {
+	defaultConf()
+
+	data, ok := lookupConf()
+	if !ok {
+		return
+	}
+
+	err := yaml.Unmarshal(data, &Conf)
+	if err != nil {
+		fmt.Println("failed read config by reason:", err)
+	}
+}
+
+func lookupConf() ([]byte, bool) {
+	filenames := []string{
+		"testdata/tergo.conf",
+		"tergo.conf",
+		filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "tergo/tergo.conf"),
+		filepath.Join(os.Getenv("HOME"), ".config/tergo/tergo.conf"),
+	}
+
+	for _, filename := range filenames {
+		data, err := ioutil.ReadFile(filename)
+		if err == nil {
+			return data, true
+		}
+	}
+
+	return nil, false
+}
+
 func defaultConf() {
 	Conf.TabCloseButton = true
 	Conf.TabHeight = 16
@@ -67,37 +96,4 @@ func defaultConf() {
 
 		"Quit": "ctrl+q",
 	}
-}
-
-func readConf() {
-	data, ok := lookupConf()
-	if !ok {
-		return
-	}
-	log.Println(string(data))
-
-	err := yaml.Unmarshal(data, &Conf)
-	log.Println(err)
-	if err != nil {
-		fmt.Println("failed read config by reason:", err)
-	}
-}
-
-func lookupConf() ([]byte, bool) {
-	filenames := []string{
-		"testdata/tergo.conf",
-		"tergo.conf",
-		filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "tergo/tergo.conf"),
-		filepath.Join(os.Getenv("HOME"), ".config/tergo/tergo.conf"),
-	}
-
-	for _, filename := range filenames {
-		log.Println(filename)
-		data, err := ioutil.ReadFile(filename)
-		if err == nil {
-			return data, true
-		}
-	}
-
-	return nil, false
 }

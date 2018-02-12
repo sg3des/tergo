@@ -121,3 +121,11 @@ func (t Terminal) SetColorBackground(pattern string) {
 // func (t Terminal) GetCurrentDirectory() string {
 // 	return C.GoString(C.vte_terminal_get_current_directory_uri(C.toVTerminal(t.Widget)))
 // }
+
+func (t Terminal) Copy() {
+	C.vte_terminal_copy_clipboard(C.toVTerminal(t.Widget))
+}
+
+func (t Terminal) Paste() {
+	C.vte_terminal_paste_clipboard(C.toVTerminal(t.Widget))
+}

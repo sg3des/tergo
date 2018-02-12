@@ -47,7 +47,8 @@ func (w *Window) ShowAll() {
 
 type NotebookTab interface {
 	GetChilds() (*gtk.Widget, gtk.IWidget)
-	Close()
+	Copy()
+	Paste()
 }
 
 func (w *Window) NewTab() {
@@ -69,9 +70,14 @@ func (w *Window) NewTab() {
 	child.GrabFocus()
 }
 
+func (w *Window) getCurrentTab() (t NotebookTab, n int) {
+	n = w.notebook.GetCurrentPage()
+	t = w.tabs[n]
+	return
+}
+
 func (w *Window) CloseTab() {
-	n := w.notebook.GetCurrentPage()
-	t := w.tabs[n]
+	t, n := w.getCurrentTab()
 
 	child, _ := t.GetChilds()
 	w.notebook.RemovePage(child, n)
@@ -83,6 +89,16 @@ func (w *Window) CloseTab() {
 	if len(w.tabs) == 0 {
 		w.Quit()
 	}
+}
+
+func (w *Window) Copy() {
+	t, _ := w.getCurrentTab()
+	t.Copy()
+}
+
+func (w *Window) Paste() {
+	t, _ := w.getCurrentTab()
+	t.Paste()
 }
 
 func (w *Window) Quit() {

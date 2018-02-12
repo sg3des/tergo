@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/mattn/go-gtk/gtk"
@@ -39,10 +38,12 @@ func (t *Tab) GetChilds() (*gtk.Widget, gtk.IWidget) {
 	return t.wdgt, t.label
 }
 
-func (t *Tab) Close() {
-	log.Println("Close")
-	// t.wdgt.Destroy()
-	// t = nil
+func (t *Tab) Copy() {
+	t.term.Copy()
+}
+
+func (t *Tab) Paste() {
+	t.term.Paste()
 }
 
 // func (t *Tab) UpdateWD() {
