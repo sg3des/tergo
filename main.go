@@ -93,7 +93,7 @@ func defaultConf() {
 	Conf.TabHeight = 16
 	Conf.Font = "Liberation Mono 7.5"
 	Conf.TermLines = 100000
-	Conf.WordChars = "-/?%&#_"
+	Conf.WordChars = "-/?%&#+._0-9a-zA-Z"
 	Conf.Background = "#222"
 	Conf.Foreground = "#bbb"
 	Conf.CursorColor = "#e8e8e8"
