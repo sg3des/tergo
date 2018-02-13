@@ -48,15 +48,23 @@ func (w *Window) ShowAll() {
 
 type NotebookTab interface {
 	GetChilds() (*gtk.Widget, gtk.IWidget)
+	GetCurrentWD() string
 	Copy()
 	Paste()
 }
 
 func (w *Window) NewTab() {
-	t := NewTab("")
+	wd := ""
+	if len(w.tabs) > 0 {
+		currt, _ := w.getCurrentTab()
+		wd = currt.GetCurrentWD()
+	}
+
+	t := NewTab(wd)
 	w.tabs = append(w.tabs, t)
 
 	child, label := t.GetChilds()
+	child.Connect("child-exited", w.tabExited, t)
 
 	n := w.notebook.AppendPage(child, label)
 
@@ -64,13 +72,18 @@ func (w *Window) NewTab() {
 	// w.notebook.SetReorderable(child, true)
 	w.notebook.ShowAll()
 	w.notebook.SetShowTabs(len(w.tabs) > 1)
-
 	w.notebook.SetCurrentPage(n)
-	// w.notebook.SetFocusChild(child)
 
-	// w.notebook.ShowAll()
 	child.GrabFocus()
+}
 
+func (w *Window) tabExited(ctx *glib.CallbackContext) {
+	t := ctx.Data().(NotebookTab)
+
+	child, _ := t.GetChilds()
+	n := w.notebook.PageNum(child)
+
+	w.remoteTab(child, n)
 }
 
 func (w *Window) getCurrentTab() (t NotebookTab, n int) {
@@ -83,6 +96,10 @@ func (w *Window) CloseTab() {
 	t, n := w.getCurrentTab()
 
 	child, _ := t.GetChilds()
+	w.remoteTab(child, n)
+}
+
+func (w *Window) remoteTab(child *gtk.Widget, n int) {
 	w.notebook.RemovePage(child, n)
 
 	w.tabs = append(w.tabs[:n], w.tabs[n+1:]...)
@@ -178,6 +195,8 @@ func (w *Window) KeysHandler() {
 			continue
 		}
 
+		gdk.ThreadsEnter()
 		f.Call([]reflect.Value{})
+		gdk.ThreadsLeave()
 	}
 }

@@ -11,6 +11,7 @@ TabCloseButton: false
 TabHeight: 13
 
 Font: "Liberation Mono 7.5"
+TermLines: 100000
 
 Background: "#222"
 Foreground: "#bbb"

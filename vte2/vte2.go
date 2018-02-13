@@ -123,9 +123,21 @@ func (t Terminal) SetColorBackground(pattern string) {
 // }
 
 func (t Terminal) Copy() {
-	C.vte_terminal_copy_clipboard(C.toVTerminal(t.Widget))
+	// C.vte_terminal_copy_clipboard(C.toVTerminal(t.Widget))
+	C.vte_terminal_copy_primary(C.toVTerminal(t.Widget))
 }
 
 func (t Terminal) Paste() {
-	C.vte_terminal_paste_clipboard(C.toVTerminal(t.Widget))
+	C.vte_terminal_paste_primary(C.toVTerminal(t.Widget))
+}
+
+func (t Terminal) SetScrollbackLines(n int) {
+	C.vte_terminal_set_scrollback_lines(C.toVTerminal(t.Widget), C.glong(n))
+}
+
+func (t Terminal) SetWordChars(chars string) {
+	ptr := C.CString(chars)
+	defer C.free(unsafe.Pointer(ptr))
+
+	C.vte_terminal_set_word_chars(C.toVTerminal(t.Widget), ptr)
 }

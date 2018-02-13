@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/mattn/go-gtk/gtk"
@@ -24,6 +25,8 @@ func NewTab(wd string) *Tab {
 	t.term.SetFontFromString(Conf.Font)
 	t.term.SetColors(Conf.Foreground, Conf.Background, Conf.Palette)
 	t.term.SetColorCursor(Conf.CursorColor)
+	t.term.SetScrollbackLines(Conf.TermLines)
+	t.term.SetWordChars(Conf.WordChars)
 
 	t.pid = t.term.Fork([]string{os.Getenv("SHELL")}, wd)
 
@@ -46,15 +49,14 @@ func (t *Tab) Paste() {
 	t.term.Paste()
 }
 
-// func (t *Tab) UpdateWD() {
-// 	wd, err := os.Readlink(fmt.Sprintf("/proc/%d/cwd", t.pid))
-// 	if err != nil {
-// 		log.Println(err)
-// 		wd = "unknown"
-// 	}
+func (t *Tab) GetCurrentWD() string {
+	wd, err := os.Readlink(fmt.Sprintf("/proc/%d/cwd", t.pid))
+	if err != nil {
+		return ""
+	}
 
-// 	t.label.SetText(wd)
-// }
+	return wd
+}
 
 func (t *Tab) changeTabLabel() {
 	t.label.SetText(t.term.GetWindowTitle())

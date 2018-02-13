@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,16 +10,23 @@ import (
 
 	"github.com/ghodss/yaml"
 
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/gtk"
 )
 
 func init() {
 	log.SetFlags(log.Lshortfile)
 
+	if f, err := ioutil.TempFile("", "tergo"); err == nil {
+		mw := io.MultiWriter(os.Stdout, f)
+		log.SetOutput(mw)
+	}
+
 	readConf()
 }
 
 func main() {
+	gdk.ThreadsInit()
 	gtk.Init(nil)
 
 	w := NewWindow("tergo", 400, 300)
@@ -36,7 +44,9 @@ var Conf struct {
 	TabCloseButton bool
 	TabHeight      int
 
-	Font string
+	Font      string
+	TermLines int
+	WordChars string
 
 	Background  string
 	Foreground  string
@@ -82,6 +92,8 @@ func defaultConf() {
 	Conf.TabCloseButton = true
 	Conf.TabHeight = 16
 	Conf.Font = "Liberation Mono 7.5"
+	Conf.TermLines = 100000
+	Conf.WordChars = "-/?%&#_"
 	Conf.Background = "#222"
 	Conf.Foreground = "#bbb"
 	Conf.CursorColor = "#e8e8e8"
