@@ -42,11 +42,11 @@ func (t *Tab) GetChilds() (*gtk.Widget, gtk.IWidget) {
 }
 
 func (t *Tab) Copy() {
-	t.term.Copy()
+	t.term.CopyClipboard()
 }
 
 func (t *Tab) Paste() {
-	t.term.Paste()
+	t.term.PasteClipboard()
 }
 
 func (t *Tab) GetCurrentWD() string {
